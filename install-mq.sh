@@ -99,6 +99,10 @@ $RHEL && groupadd --system --gid 888 mqm
 $RHEL && useradd --system --uid 888 --gid mqm mqm
 usermod -G mqm root
 
+# Add mqm to group that owns /mnt/mqm. This is necessary for GlusterFS storage, because it generates a random GID for /mnt/mqm
+VOLUME_GID=$(stat -c %g /mnt/mqm)
+[ "$VOLUME_GID" != "0" ] && groupadd -g $VOLUME_GID storage && usermod -a -G storage mqm
+
 # Find directory containing .deb files
 $UBUNTU && DIR_DEB=$(find ${DIR_EXTRACT} -name "*.deb" -printf "%h\n" | sort -u | head -1)
 $RHEL && DIR_RPM=$(find ${DIR_EXTRACT} -name "*.rpm" -printf "%h\n" | sort -u | head -1)
